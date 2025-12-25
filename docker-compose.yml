@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ibakery-postgres
+    environment:
+      POSTGRES_USER: ibakery
+      POSTGRES_PASSWORD: ibakery123
+      POSTGRES_DB: ibakery
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ibakery"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: ibakery-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ibakery:ibakery123@postgres:5432/ibakery
+      SECRET_KEY: change-me-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  baker:
+    build:
+      context: ./baker
+      args:
+        API_URL: http://localhost:8000/api
+    container_name: ibakery-baker
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+  client:
+    build:
+      context: ./client
+      args:
+        API_URL: http://localhost:8000/api
+    container_name: ibakery-client
+    ports:
+      - "8081:8080"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

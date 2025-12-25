@@ -1,0 +1,11 @@
+{{- if .Values.apiUrl }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "artisan.fullname" . }}-config
+  labels:
+    {{- include "artisan.labels" . | nindent 4 }}
+data:
+  config.js: |
+    window.API_URL = "{{ .Values.apiUrl }}";
+{{- end }}

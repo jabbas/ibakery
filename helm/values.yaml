@@ -1,0 +1,79 @@
+# iBakery Umbrella Chart Values
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"  # or "traefik"
+  host: "marta.jabbas.eu"
+  annotations: {}
+  tls: []
+  # - secretName: marta-jabbas-eu-tls
+  #   hosts:
+  #     - marta.jabbas.eu
+
+# PostgreSQL database (CloudNative PG)
+database:
+  enabled: true
+  cluster:
+    instances: 2
+    affinity:
+      enablePodAntiAffinity: true
+      topologyKey: kubernetes.io/hostname
+    bootstrap:
+      initdb:
+        database: ibakery
+        owner: ibakery
+    storage:
+      size: 1Gi
+    backup:
+      volumeSnapshot:
+        className: democratic-csi
+        online: true
+        onlineConfiguration:
+          waitForArchive: true
+          immediateCheckpoint: true
+    monitoring:
+      enablePodMonitor: false
+  scheduledBackup:
+    schedule: "0 0 2 * * 1"  # sec min hour day month weekday
+    backupOwnerReference: self
+    method: volumeSnapshot
+
+# Backend configuration
+backend:
+  replicaCount: 1
+  ingress:
+    enabled: false
+  env:
+    SECRET_KEY: "change-me-in-production"
+  # Database connection from CNPG secret (backend uses computed db_url)
+  envSecret:
+    - name: PGHOST
+      secretName: "{{ .Release.Name }}-db-app"
+      key: host
+    - name: PGPORT
+      secretName: "{{ .Release.Name }}-db-app"
+      key: port
+    - name: PGUSER
+      secretName: "{{ .Release.Name }}-db-app"
+      key: username
+    - name: PGPASSWORD
+      secretName: "{{ .Release.Name }}-db-app"
+      key: password
+    - name: PGDATABASE
+      secretName: "{{ .Release.Name }}-db-app"
+      key: dbname
+
+# Artisan Panel configuration
+artisan:
+  replicaCount: 1
+  ingress:
+    enabled: false
+  apiUrl: "https://marta.jabbas.eu/api"
+
+# Client App configuration
+client:
+  replicaCount: 1
+  ingress:
+    enabled: false
+  apiUrl: "https://marta.jabbas.eu/api"

@@ -1,0 +1,24 @@
+{{- if .Values.database.enabled }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}-db
+  labels:
+    {{- include "ibakery.labels" . | nindent 4 }}
+spec:
+  {{- toYaml .Values.database.cluster | nindent 2 }}
+{{- if .Values.database.scheduledBackup }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Release.Name }}-db-backup
+  labels:
+    {{- include "ibakery.labels" . | nindent 4 }}
+spec:
+  cluster:
+    name: {{ .Release.Name }}-db
+  {{- toYaml .Values.database.scheduledBackup | nindent 2 }}
+{{- end }}
+{{- end }}

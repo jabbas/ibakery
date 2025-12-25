@@ -1,0 +1,29 @@
+iBakery has been deployed!
+
+{{- if .Values.ingress.enabled }}
+
+Access your application at:
+  - Client App:  https://{{ .Values.ingress.host }}/
+  - Artisan Panel: https://{{ .Values.ingress.host }}/artisan/
+  - Backend API: https://{{ .Values.ingress.host }}/api/
+
+{{- else }}
+
+Components:
+  - Backend API: {{ .Release.Name }}-backend
+  - Artisan Panel: {{ .Release.Name }}-artisan
+  - Client App:  {{ .Release.Name }}-client
+
+To access the services via port-forward:
+
+1. Backend API:
+   kubectl port-forward svc/{{ .Release.Name }}-backend 8000:8000
+
+2. Artisan Panel:
+   kubectl port-forward svc/{{ .Release.Name }}-artisan 8080:8080
+   Then open: http://localhost:8080
+
+3. Client App:
+   kubectl port-forward svc/{{ .Release.Name }}-client 8081:8080
+   Then open: http://localhost:8081
+{{- end }}
