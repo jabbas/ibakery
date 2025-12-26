@@ -126,39 +126,39 @@ async def create_order(
         )
 
     # Create order
-    try:
-        order = Order(
-            offer_id=order_data.offer_id,
-            pickup_point_id=order_data.pickup_point_id,
-            customer_name=order_data.customer_name,
-            customer_phone=order_data.customer_phone,
-            customer_email=order_data.customer_email,
-            payment_method=order_data.payment_method.value,
-            total_price=total_price,
-            notes=order_data.notes,
+    order = Order(
+        offer_id=order_data.offer_id,
+        pickup_point_id=order_data.pickup_point_id,
+        customer_name=order_data.customer_name,
+        customer_phone=order_data.customer_phone,
+        customer_email=order_data.customer_email,
+        payment_method=order_data.payment_method.value,
+        total_price=total_price,
+        notes=order_data.notes,
+    )
+    db.add(order)
+    await db.flush()
+
+    # Create order items and update availability
+    for item_info in items_to_create:
+        order_item = OrderItem(
+            order_id=order.id,
+            offer_item_id=item_info["offer_item_id"],
+            quantity=item_info["quantity"],
+            unit_price=item_info["unit_price"],
         )
-        db.add(order)
-        await db.flush()
-        # Create order items and update availability
-        for item_info in items_to_create:
-            order_item = OrderItem(
-                order_id=order.id,
-                offer_item_id=item_info["offer_item_id"],
-                quantity=item_info["quantity"],
-                unit_price=item_info["unit_price"],
+        db.add(order_item)
+
+        # Update availability
+        if item_info["available_quantity"] is not None:
+            offer_item_result = await db.execute(
+                select(OfferItem).where(OfferItem.id == item_info["offer_item_id"])
             )
-            db.add(order_item)
+            offer_item_to_update = offer_item_result.scalar_one()
+            offer_item_to_update.available_quantity -= item_info["quantity"]
 
-            # Update availability
-            if item_info["available_quantity"] is not None:
-                offer_item_result = await db.execute(
-                    select(OfferItem).where(OfferItem.id == item_info["offer_item_id"])
-                )
-                offer_item_to_update = offer_item_result.scalar_one()
-                offer_item_to_update.available_quantity -= item_info["quantity"]
-
-        await db.commit()
-        order_id = order.id  # Save ID before expire
+    await db.commit()
+    order_id = order.id  # Save ID before expire
 
     # Reload with relationships
     result = await db.execute(_order_query().where(Order.id == order_id))
