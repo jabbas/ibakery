@@ -3,4 +3,4 @@ name: client
 description: iBakery Client App - Flutter Web App for customers
 type: application
 version: 0.1.0
-appVersion: "0.0.2"
+appVersion: "0.0.13"
