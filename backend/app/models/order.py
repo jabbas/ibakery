@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from sqlalchemy import String, DateTime, ForeignKey, Numeric, Text, Enum as SAEnum
+from sqlalchemy import String, DateTime, ForeignKey, Numeric, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..database import Base
 
@@ -28,12 +28,9 @@ class Order(Base):
     customer_name: Mapped[str] = mapped_column(String(200), nullable=False)
     customer_phone: Mapped[str] = mapped_column(String(20), nullable=False)
     customer_email: Mapped[str] = mapped_column(String(200), nullable=False)
-    payment_method: Mapped[PaymentMethod] = mapped_column(
-        SAEnum(PaymentMethod, name='paymentmethod', create_type=False), nullable=False
-    )
-    payment_status: Mapped[PaymentStatus] = mapped_column(
-        SAEnum(PaymentStatus, name='paymentstatus', create_type=False),
-        nullable=False, default=PaymentStatus.PENDING
+    payment_method: Mapped[str] = mapped_column(String(20), nullable=False)
+    payment_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=PaymentStatus.PENDING.value
     )
     total_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

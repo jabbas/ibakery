@@ -123,7 +123,7 @@ async def create_order(
             customer_name=order_data.customer_name,
             customer_phone=order_data.customer_phone,
             customer_email=order_data.customer_email,
-            payment_method=order_data.payment_method,
+            payment_method=order_data.payment_method.value,
             total_price=total_price,
             notes=order_data.notes,
         )
@@ -151,6 +151,7 @@ async def create_order(
                 offer_item_to_update.available_quantity -= item_info["quantity"]
 
         await db.commit()
+        order_id = order.id  # Save ID before expire
         logger.info("Order committed successfully")
     except Exception as e:
         import traceback
@@ -158,12 +159,9 @@ async def create_order(
         print(traceback.format_exc(), flush=True)
         raise
 
-    # Expire all cached objects to force fresh load
-    db.expire_all()
-
     # Reload with relationships
     try:
-        result = await db.execute(_order_query().where(Order.id == order.id))
+        result = await db.execute(_order_query().where(Order.id == order_id))
         order_result = result.scalar_one()
         print(f"DEBUG: Order reloaded: {order_result.id}", flush=True)
         print(f"DEBUG: payment_method={order_result.payment_method}, payment_status={order_result.payment_status}", flush=True)
@@ -190,15 +188,15 @@ async def update_order(
 
     update_data = order_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        # Convert enum to string value for database
+        if hasattr(value, 'value'):
+            value = value.value
         setattr(order, field, value)
 
     await db.commit()
 
-    # Expire all cached objects to force fresh load
-    db.expire_all()
-
-    # Reload with relationships
-    result = await db.execute(_order_query().where(Order.id == order.id))
+    # Reload with relationships (order_id from path, no lazy load issue)
+    result = await db.execute(_order_query().where(Order.id == order_id))
     return result.scalar_one()
 
 
