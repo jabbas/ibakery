@@ -79,6 +79,14 @@ class DashboardScreen extends ConsumerWidget {
                       onTap: () => context.go('/orders'),
                       compact: isMobile,
                     ),
+                    _DashboardCard(
+                      icon: Icons.place,
+                      title: 'Punkty odbioru',
+                      subtitle: 'Zarządzaj punktami odbioru',
+                      color: Colors.teal,
+                      onTap: () => context.go('/pickup-points'),
+                      compact: isMobile,
+                    ),
                   ];
 
                   return SingleChildScrollView(
