@@ -129,11 +129,11 @@ async def create_order(
         )
         db.add(order)
         await db.flush()
-        logger.info(f"Order created with id: {order.id}")
+        print(f"DEBUG: Order created with id: {order.id}", flush=True)
 
         # Create order items and update availability
         for item_info in items_to_create:
-            logger.info(f"Creating order item: offer_item_id={item_info['offer_item_id']}, quantity={item_info['quantity']}, unit_price={item_info['unit_price']}")
+            print(f"DEBUG: Creating order item: {item_info}", flush=True)
             order_item = OrderItem(
                 order_id=order.id,
                 offer_item_id=item_info["offer_item_id"],
@@ -153,7 +153,9 @@ async def create_order(
         await db.commit()
         logger.info("Order committed successfully")
     except Exception as e:
-        logger.exception(f"Error creating order: {e}")
+        import traceback
+        print(f"DEBUG ERROR: {e}", flush=True)
+        print(traceback.format_exc(), flush=True)
         raise
 
     # Expire all cached objects to force fresh load
