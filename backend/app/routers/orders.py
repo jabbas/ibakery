@@ -165,10 +165,13 @@ async def create_order(
     try:
         result = await db.execute(_order_query().where(Order.id == order.id))
         order_result = result.scalar_one()
-        logger.info(f"Order reloaded: {order_result.id}")
+        print(f"DEBUG: Order reloaded: {order_result.id}", flush=True)
+        print(f"DEBUG: payment_method={order_result.payment_method}, payment_status={order_result.payment_status}", flush=True)
         return order_result
     except Exception as e:
-        logger.exception(f"Error reloading order: {e}")
+        import traceback
+        print(f"DEBUG ERROR reloading: {e}", flush=True)
+        print(traceback.format_exc(), flush=True)
         raise
 
 
