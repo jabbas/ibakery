@@ -29,15 +29,27 @@ def upgrade() -> None:
     paymentmethod.create(op.get_bind(), checkfirst=True)
     paymentstatus.create(op.get_bind(), checkfirst=True)
 
+    # Drop default before converting (can't cast default automatically)
+    op.execute('ALTER TABLE orders ALTER COLUMN payment_status DROP DEFAULT')
+
     # Alter columns to use enum types
     op.execute('ALTER TABLE orders ALTER COLUMN payment_method TYPE paymentmethod USING payment_method::paymentmethod')
     op.execute('ALTER TABLE orders ALTER COLUMN payment_status TYPE paymentstatus USING payment_status::paymentstatus')
 
+    # Restore default with enum value
+    op.execute("ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'PENDING'")
+
 
 def downgrade() -> None:
+    # Drop default before converting
+    op.execute('ALTER TABLE orders ALTER COLUMN payment_status DROP DEFAULT')
+
     # Convert back to VARCHAR
     op.execute('ALTER TABLE orders ALTER COLUMN payment_method TYPE VARCHAR(20) USING payment_method::text')
     op.execute('ALTER TABLE orders ALTER COLUMN payment_status TYPE VARCHAR(20) USING payment_status::text')
+
+    # Restore default
+    op.execute("ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'PENDING'")
 
     # Drop enum types
     op.execute('DROP TYPE IF EXISTS paymentmethod')
