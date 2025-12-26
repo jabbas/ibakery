@@ -30,6 +30,7 @@ from .routers import (
     offers_router,
     orders_router,
     auth_router,
+    pickup_points_router,
 )
 from .database import async_session
 from .models import *  # noqa: F401, F403 - Import all models for table creation
@@ -198,6 +199,7 @@ app.include_router(ingredients_router, prefix="/api")
 app.include_router(products_router, prefix="/api")
 app.include_router(offers_router, prefix="/api")
 app.include_router(orders_router, prefix="/api")
+app.include_router(pickup_points_router, prefix="/api")
 
 
 @app.get("/")

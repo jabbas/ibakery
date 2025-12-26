@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime, date, time
 from decimal import Decimal
 from ..models.order import PaymentMethod, PaymentStatus
+from .pickup_point import PickupPointResponse
 
 
 class OrderItemCreate(BaseModel):
@@ -29,6 +30,7 @@ class OrderBase(BaseModel):
 
 class OrderCreate(OrderBase):
     offer_id: UUID
+    pickup_point_id: UUID
     items: list[OrderItemCreate]
 
 
@@ -54,8 +56,10 @@ class OrderResponse(OrderBase):
 
     id: UUID
     offer_id: UUID
+    pickup_point_id: UUID | None
     payment_status: PaymentStatus
     total_price: Decimal
     created_at: datetime
     items: list[OrderItemResponse] = []
     offer: OrderOfferInfo | None = None
+    pickup_point: PickupPointResponse | None = None

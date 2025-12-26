@@ -8,6 +8,7 @@ from .offer_item import OfferItem
 from .order import Order, PaymentMethod, PaymentStatus
 from .order_item import OrderItem
 from .baker import Baker
+from .pickup_point import PickupPoint
 
 __all__ = [
     "Unit",
@@ -22,4 +23,5 @@ __all__ = [
     "PaymentStatus",
     "OrderItem",
     "Baker",
+    "PickupPoint",
 ]

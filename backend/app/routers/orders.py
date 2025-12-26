@@ -12,6 +12,7 @@ from ..models.offer_item import OfferItem
 from ..models.order import Order
 from ..models.order_item import OrderItem
 from ..models.baker import Baker
+from ..models.pickup_point import PickupPoint
 from ..schemas.order import OrderCreate, OrderUpdate, OrderResponse
 from .auth import get_current_baker
 
@@ -22,6 +23,7 @@ def _order_query():
     return select(Order).options(
         selectinload(Order.items),
         selectinload(Order.offer),
+        selectinload(Order.pickup_point),
     )
 
 
@@ -70,6 +72,16 @@ async def create_order(
     if datetime.utcnow() > offer.order_deadline:
         raise HTTPException(status_code=400, detail="Order deadline has passed")
 
+    # Verify pickup point exists and is active
+    pickup_point_result = await db.execute(
+        select(PickupPoint).where(PickupPoint.id == order_data.pickup_point_id)
+    )
+    pickup_point = pickup_point_result.scalar_one_or_none()
+    if not pickup_point:
+        raise HTTPException(status_code=404, detail="Punkt odbioru nie istnieje")
+    if not pickup_point.is_active:
+        raise HTTPException(status_code=400, detail="Wybrany punkt odbioru jest nieaktywny")
+
     # Validate items and calculate total
     total_price = Decimal("0")
     items_to_create = []
@@ -117,6 +129,7 @@ async def create_order(
     try:
         order = Order(
             offer_id=order_data.offer_id,
+            pickup_point_id=order_data.pickup_point_id,
             customer_name=order_data.customer_name,
             customer_phone=order_data.customer_phone,
             customer_email=order_data.customer_email,

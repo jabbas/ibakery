@@ -34,12 +34,18 @@ class Order(Base):
     )
     total_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    pickup_point_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("pickup_points.id"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
 
     # Relationships
     offer: Mapped["Offer"] = relationship("Offer", back_populates="orders")
+    pickup_point: Mapped["PickupPoint"] = relationship(
+        "PickupPoint", back_populates="orders"
+    )
     items: Mapped[list["OrderItem"]] = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )
