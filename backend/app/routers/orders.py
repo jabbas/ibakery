@@ -1,15 +1,12 @@
 from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
-import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from ..database import get_db
-
-logger = logging.getLogger(__name__)
 from ..models.offer import Offer
 from ..models.offer_item import OfferItem
 from ..models.order import Order
@@ -129,11 +126,8 @@ async def create_order(
         )
         db.add(order)
         await db.flush()
-        print(f"DEBUG: Order created with id: {order.id}", flush=True)
-
         # Create order items and update availability
         for item_info in items_to_create:
-            print(f"DEBUG: Creating order item: {item_info}", flush=True)
             order_item = OrderItem(
                 order_id=order.id,
                 offer_item_id=item_info["offer_item_id"],
@@ -152,25 +146,10 @@ async def create_order(
 
         await db.commit()
         order_id = order.id  # Save ID before expire
-        logger.info("Order committed successfully")
-    except Exception as e:
-        import traceback
-        print(f"DEBUG ERROR: {e}", flush=True)
-        print(traceback.format_exc(), flush=True)
-        raise
 
     # Reload with relationships
-    try:
-        result = await db.execute(_order_query().where(Order.id == order_id))
-        order_result = result.scalar_one()
-        print(f"DEBUG: Order reloaded: {order_result.id}", flush=True)
-        print(f"DEBUG: payment_method={order_result.payment_method}, payment_status={order_result.payment_status}", flush=True)
-        return order_result
-    except Exception as e:
-        import traceback
-        print(f"DEBUG ERROR reloading: {e}", flush=True)
-        print(traceback.format_exc(), flush=True)
-        raise
+    result = await db.execute(_order_query().where(Order.id == order_id))
+    return result.scalar_one()
 
 
 @router.patch("/{order_id}", response_model=OrderResponse)
