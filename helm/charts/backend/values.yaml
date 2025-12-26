@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: docker.io/jabbas/ibakery-backend
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: ""
 
 imagePullSecrets: []
@@ -11,7 +11,6 @@ fullnameOverride: ""
 
 # Environment variables
 env:
-  DATABASE_URL: "postgresql+asyncpg://ibakery:ibakery123@postgres:5432/ibakery"
   SECRET_KEY: "change-me-in-production"
 
 # Environment variables from secrets

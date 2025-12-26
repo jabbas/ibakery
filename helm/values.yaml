@@ -3,7 +3,7 @@
 # Ingress configuration
 ingress:
   enabled: true
-  className: "nginx"  # or "traefik"
+  className: "traefik-external"
   host: "marta.jabbas.eu"
   annotations: {}
   tls: []
@@ -70,6 +70,7 @@ artisan:
   ingress:
     enabled: false
   apiUrl: "https://marta.jabbas.eu/api"
+  basePath: "/artisan/"
 
 # Client App configuration
 client:

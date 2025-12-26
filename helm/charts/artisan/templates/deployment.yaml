@@ -59,7 +59,7 @@ spec:
           volumeMounts:
             {{- if .Values.apiUrl }}
             - name: config
-              mountPath: /public/config.js
+              mountPath: /public{{ .Values.basePath }}config.js
               subPath: config.js
             {{- end }}
             {{- with .Values.volumeMounts }}

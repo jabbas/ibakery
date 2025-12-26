@@ -6,10 +6,13 @@ ARG BASE_HREF=/
 WORKDIR /app
 
 COPY pubspec.yaml pubspec.lock ./
-RUN flutter pub get
+RUN --mount=type=cache,target=/root/.pub-cache \
+    flutter pub get
 
 COPY . .
-RUN flutter build web --wasm --release --base-href=${BASE_HREF}
+RUN --mount=type=cache,target=/root/.pub-cache \
+    --mount=type=cache,target=/app/.dart_tool \
+    flutter build web --wasm --release --base-href=${BASE_HREF}
 
 # Production stage
 FROM joseluisq/static-web-server:2

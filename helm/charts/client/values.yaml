@@ -5,7 +5,7 @@ apiUrl: "http://localhost:8000/api"
 
 image:
   repository: docker.io/jabbas/ibakery-client
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: ""
 
 imagePullSecrets: []

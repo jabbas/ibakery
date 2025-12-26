@@ -36,6 +36,22 @@ spec:
                 name: {{ .Release.Name }}-backend
                 port:
                   number: 8000
+          # Backend API docs at /docs
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-backend
+                port:
+                  number: 8000
+          # Backend OpenAPI schema
+          - path: /openapi.json
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Release.Name }}-backend
+                port:
+                  number: 8000
           # Artisan Panel at /artisan
           - path: /artisan
             pathType: Prefix

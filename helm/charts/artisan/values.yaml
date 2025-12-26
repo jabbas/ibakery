@@ -3,9 +3,12 @@ replicaCount: 1
 # Backend API URL
 apiUrl: "http://localhost:8000/api"
 
+# Base path for serving (must match --base-href used in Docker build)
+basePath: "/"
+
 image:
   repository: docker.io/jabbas/ibakery-artisan
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: ""
 
 imagePullSecrets: []

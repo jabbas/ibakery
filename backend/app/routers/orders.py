@@ -1,12 +1,15 @@
 from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from ..database import get_db
+
+logger = logging.getLogger(__name__)
 from ..models.offer import Offer
 from ..models.offer_item import OfferItem
 from ..models.order import Order
@@ -106,47 +109,65 @@ async def create_order(
 
         items_to_create.append(
             {
-                "offer_item": offer_item,
+                "offer_item_id": offer_item.id,
                 "quantity": item_data.quantity,
                 "unit_price": offer_item.price,
+                "available_quantity": offer_item.available_quantity,
             }
         )
 
     # Create order
-    order = Order(
-        offer_id=order_data.offer_id,
-        customer_name=order_data.customer_name,
-        customer_phone=order_data.customer_phone,
-        customer_email=order_data.customer_email,
-        payment_method=order_data.payment_method,
-        total_price=total_price,
-        notes=order_data.notes,
-    )
-    db.add(order)
-    await db.flush()
-
-    # Create order items and update availability
-    for item_info in items_to_create:
-        order_item = OrderItem(
-            order_id=order.id,
-            offer_item_id=item_info["offer_item"].id,
-            quantity=item_info["quantity"],
-            unit_price=item_info["unit_price"],
+    try:
+        order = Order(
+            offer_id=order_data.offer_id,
+            customer_name=order_data.customer_name,
+            customer_phone=order_data.customer_phone,
+            customer_email=order_data.customer_email,
+            payment_method=order_data.payment_method,
+            total_price=total_price,
+            notes=order_data.notes,
         )
-        db.add(order_item)
+        db.add(order)
+        await db.flush()
+        logger.info(f"Order created with id: {order.id}")
 
-        # Update availability
-        if item_info["offer_item"].available_quantity is not None:
-            item_info["offer_item"].available_quantity -= item_info["quantity"]
+        # Create order items and update availability
+        for item_info in items_to_create:
+            logger.info(f"Creating order item: offer_item_id={item_info['offer_item_id']}, quantity={item_info['quantity']}, unit_price={item_info['unit_price']}")
+            order_item = OrderItem(
+                order_id=order.id,
+                offer_item_id=item_info["offer_item_id"],
+                quantity=item_info["quantity"],
+                unit_price=item_info["unit_price"],
+            )
+            db.add(order_item)
 
-    await db.commit()
+            # Update availability
+            if item_info["available_quantity"] is not None:
+                offer_item_result = await db.execute(
+                    select(OfferItem).where(OfferItem.id == item_info["offer_item_id"])
+                )
+                offer_item_to_update = offer_item_result.scalar_one()
+                offer_item_to_update.available_quantity -= item_info["quantity"]
+
+        await db.commit()
+        logger.info("Order committed successfully")
+    except Exception as e:
+        logger.exception(f"Error creating order: {e}")
+        raise
 
     # Expire all cached objects to force fresh load
     db.expire_all()
 
     # Reload with relationships
-    result = await db.execute(_order_query().where(Order.id == order.id))
-    return result.scalar_one()
+    try:
+        result = await db.execute(_order_query().where(Order.id == order.id))
+        order_result = result.scalar_one()
+        logger.info(f"Order reloaded: {order_result.id}")
+        return order_result
+    except Exception as e:
+        logger.exception(f"Error reloading order: {e}")
+        raise
 
 
 @router.patch("/{order_id}", response_model=OrderResponse)
