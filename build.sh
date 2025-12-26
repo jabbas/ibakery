@@ -2,7 +2,7 @@
 set -e
 
 REGISTRY="docker.io/jabbas"
-VERSION=$(git describe)
+VERSION="latest"
 PLATFORM="linux/amd64"
 
 # Base paths for Flutter apps

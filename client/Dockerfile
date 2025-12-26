@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/root/.pub-cache \
 COPY . .
 RUN --mount=type=cache,target=/root/.pub-cache \
     --mount=type=cache,target=/app/.dart_tool \
-    flutter build web --release --base-href=${BASE_HREF}
+    flutter build web --release --pwa-strategy none --base-href=${BASE_HREF}
 
 # Production stage
 FROM joseluisq/static-web-server:2
