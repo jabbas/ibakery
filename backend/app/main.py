@@ -207,7 +207,7 @@ async def root():
     return {"message": "Welcome to iBakery API", "docs": "/docs"}
 
 
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "healthy"}
 
