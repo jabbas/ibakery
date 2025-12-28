@@ -210,3 +210,9 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/version")
+async def get_version():
+    import os
+    return {"version": os.environ.get("APP_VERSION", "unknown")}

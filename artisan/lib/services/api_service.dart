@@ -7,6 +7,7 @@ import 'dart:js_interop';
 external String? get _jsApiUrl;
 
 String get baseUrl => _jsApiUrl ?? 'http://localhost:8000/api';
+const String appVersion = String.fromEnvironment('APP_VERSION', defaultValue: 'dev');
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
@@ -38,6 +39,10 @@ final dioProvider = Provider<Dio>((ref) {
 
 final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(ref.watch(dioProvider));
+});
+
+final backendVersionProvider = FutureProvider<String>((ref) async {
+  return ref.read(apiServiceProvider).getBackendVersion();
 });
 
 class ApiService {
@@ -158,6 +163,16 @@ class ApiService {
   Future<Map<String, dynamic>> updateOrder(String id, Map<String, dynamic> data) async {
     final response = await _dio.patch('/orders/$id', data: data);
     return response.data;
+  }
+
+  // Version
+  Future<String> getBackendVersion() async {
+    try {
+      final response = await _dio.get('/version');
+      return response.data['version'] ?? 'unknown';
+    } catch (_) {
+      return 'unknown';
+    }
   }
 
   // Pickup Points

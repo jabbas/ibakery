@@ -11,6 +11,7 @@ import 'screens/offers_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/pickup_points_screen.dart';
 import 'services/auth_service.dart';
+import 'services/api_service.dart' show appVersion, backendVersionProvider;
 
 void main() {
   runApp(const ProviderScope(child: BakerApp()));
@@ -101,77 +102,108 @@ class DashboardShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
-          NavigationRail(
-            selectedIndex: _getSelectedIndex(context),
-            onDestinationSelected: (index) => _onDestinationSelected(context, index),
-            labelType: NavigationRailLabelType.all,
-            leading: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Column(
-                children: [
-                  Icon(Icons.bakery_dining, size: 40, color: Theme.of(context).primaryColor),
-                  const SizedBox(height: 8),
-                  const Text('iBakery', style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              NavigationRail(
+                selectedIndex: _getSelectedIndex(context),
+                onDestinationSelected: (index) => _onDestinationSelected(context, index),
+                labelType: NavigationRailLabelType.all,
+                leading: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      Icon(Icons.bakery_dining, size: 40, color: Theme.of(context).primaryColor),
+                      const SizedBox(height: 8),
+                      const Text('iBakery', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                trailing: Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: IconButton(
+                        icon: const Icon(Icons.logout),
+                        onPressed: () {
+                          ref.read(authStateProvider.notifier).logout();
+                          context.go('/login');
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                destinations: const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.dashboard_outlined),
+                    selectedIcon: Icon(Icons.dashboard),
+                    label: Text('Panel'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.straighten_outlined),
+                    selectedIcon: Icon(Icons.straighten),
+                    label: Text('Jednostki'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.egg_outlined),
+                    selectedIcon: Icon(Icons.egg),
+                    label: Text('Składniki'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.bakery_dining_outlined),
+                    selectedIcon: Icon(Icons.bakery_dining),
+                    label: Text('Produkty'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.local_offer_outlined),
+                    selectedIcon: Icon(Icons.local_offer),
+                    label: Text('Oferty'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.receipt_long_outlined),
+                    selectedIcon: Icon(Icons.receipt_long),
+                    label: Text('Zamówienia'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.location_on_outlined),
+                    selectedIcon: Icon(Icons.location_on),
+                    label: Text('Punkty odbioru'),
+                  ),
                 ],
               ),
-            ),
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () {
-                      ref.read(authStateProvider.notifier).logout();
-                      context.go('/login');
-                    },
-                  ),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(child: child),
+            ],
+          ),
+          Positioned(
+            right: 8,
+            bottom: 8,
+            child: ref.watch(backendVersionProvider).when(
+              data: (backendVersion) => Text(
+                'app: $appVersion | api: $backendVersion',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[400],
+                ),
+              ),
+              loading: () => Text(
+                'app: $appVersion | api: ...',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[400],
+                ),
+              ),
+              error: (_, __) => Text(
+                'app: $appVersion | api: ?',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[400],
                 ),
               ),
             ),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: Text('Panel'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.straighten_outlined),
-                selectedIcon: Icon(Icons.straighten),
-                label: Text('Jednostki'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.egg_outlined),
-                selectedIcon: Icon(Icons.egg),
-                label: Text('Składniki'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.bakery_dining_outlined),
-                selectedIcon: Icon(Icons.bakery_dining),
-                label: Text('Produkty'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.local_offer_outlined),
-                selectedIcon: Icon(Icons.local_offer),
-                label: Text('Oferty'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long),
-                label: Text('Zamówienia'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.location_on_outlined),
-                selectedIcon: Icon(Icons.location_on),
-                label: Text('Punkty odbioru'),
-              ),
-            ],
           ),
-          const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: child),
         ],
       ),
     );

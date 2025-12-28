@@ -5,7 +5,8 @@ import 'dart:js_interop';
 @JS('window.API_URL')
 external String? get _jsApiUrl;
 
-String get baseUrl => _jsApiUrl ?? 'http://localhost:8000/api';
+String get baseUrl => _jsApiUrl ?? 'https://marta.jabbas.eu/api';
+const String appVersion = String.fromEnvironment('APP_VERSION', defaultValue: 'dev');
 
 final dioProvider = Provider<Dio>((ref) {
   return Dio(BaseOptions(baseUrl: baseUrl));
@@ -13,6 +14,10 @@ final dioProvider = Provider<Dio>((ref) {
 
 final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(ref.watch(dioProvider));
+});
+
+final backendVersionProvider = FutureProvider<String>((ref) async {
+  return ref.read(apiServiceProvider).getBackendVersion();
 });
 
 class ApiService {
@@ -43,5 +48,14 @@ class ApiService {
   Future<List<Map<String, dynamic>>> getPickupPoints() async {
     final response = await _dio.get('/pickup-points', queryParameters: {'active_only': true});
     return List<Map<String, dynamic>>.from(response.data);
+  }
+
+  Future<String> getBackendVersion() async {
+    try {
+      final response = await _dio.get('/version');
+      return response.data['version'] ?? 'unknown';
+    } catch (_) {
+      return 'unknown';
+    }
   }
 }

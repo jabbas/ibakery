@@ -27,7 +27,9 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Set environment variables
+ARG APP_VERSION=latest
 ENV PYTHONUNBUFFERED=1
+ENV APP_VERSION=${APP_VERSION}
 
 # Create non-root user
 RUN adduser -D -u 1000 appuser

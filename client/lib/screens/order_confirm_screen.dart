@@ -265,7 +265,24 @@ class _OrderConfirmScreenState extends ConsumerState<OrderConfirmScreen> {
                                 if (index > 0) const Divider(height: 1),
                                 RadioListTile<String>(
                                   title: Text(point['name'] ?? ''),
-                                  subtitle: Text(point['address'] ?? ''),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(point['address'] ?? ''),
+                                      if (point['description'] != null && point['description'].toString().isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            point['description'],
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                   value: point['id'],
                                   groupValue: _selectedPickupPointId,
                                   onChanged: (value) => setState(() => _selectedPickupPointId = value),
