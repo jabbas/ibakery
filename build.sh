@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export CI=true
+
 REGISTRY="docker.io/jabbas"
 VERSION="${1:-latest}"
 PLATFORM="linux/amd64"
@@ -19,17 +21,28 @@ sed -i '' "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/charts/backend/Cha
 sed -i '' "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/charts/artisan/Chart.yaml
 sed -i '' "s/^appVersion:.*/appVersion: \"${VERSION}\"/" helm/charts/client/Chart.yaml
 
+# Build Flutter apps
+echo "Building artisan Flutter app..."
+cd artisan
+flutter build web --release --pwa-strategy none --base-href="${ARTISAN_BASE_HREF}" --dart-define=APP_VERSION="${VERSION}"
+cd ..
+
+echo "Building client Flutter app..."
+cd client
+flutter build web --release --pwa-strategy none --base-href="${CLIENT_BASE_HREF}" --dart-define=APP_VERSION="${VERSION}"
+cd ..
+
 # Backend
-echo "Building backend..."
+echo "Building backend image..."
 podman build --platform ${PLATFORM} --build-arg APP_VERSION="${VERSION}" -t ${REGISTRY}/ibakery-backend:${VERSION} ./backend
 
 # Artisan
-echo "Building artisan..."
-podman build --platform ${PLATFORM} --build-arg BASE_HREF="${ARTISAN_BASE_HREF}" --build-arg APP_VERSION="${VERSION}" -t ${REGISTRY}/ibakery-artisan:${VERSION} ./artisan
+echo "Building artisan image..."
+podman build --platform ${PLATFORM} -f Dockerfile.flutter --build-arg BUILD_DIR=artisan/build/web --build-arg BASE_HREF="${ARTISAN_BASE_HREF}" -t ${REGISTRY}/ibakery-artisan:${VERSION} .
 
 # Client
-echo "Building client..."
-podman build --platform ${PLATFORM} --build-arg BASE_HREF="${CLIENT_BASE_HREF}" --build-arg APP_VERSION="${VERSION}" -t ${REGISTRY}/ibakery-client:${VERSION} ./client
+echo "Building client image..."
+podman build --platform ${PLATFORM} -f Dockerfile.flutter --build-arg BUILD_DIR=client/build/web --build-arg BASE_HREF="${CLIENT_BASE_HREF}" -t ${REGISTRY}/ibakery-client:${VERSION} .
 
 # Push
 echo "Pushing images..."
