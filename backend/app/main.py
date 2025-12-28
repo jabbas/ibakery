@@ -212,7 +212,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@app.get("/version")
+@app.get("/api/version")
 async def get_version():
     import os
     return {"version": os.environ.get("APP_VERSION", "unknown")}

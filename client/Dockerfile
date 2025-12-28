@@ -3,7 +3,9 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 ARG BASE_HREF=/
 ARG APP_VERSION=latest
-ENV FLUTTER_ALLOW_SUPERUSER=true
+
+ENV CI=true
+ENV PUB_CACHE=/root/.pub-cache
 
 WORKDIR /app
 
@@ -20,7 +22,8 @@ RUN --mount=type=cache,target=/root/.pub-cache \
 FROM joseluisq/static-web-server:2
 
 COPY --from=build /app/build/web /public
+COPY sws-config.toml /config.toml
 
 EXPOSE 8080
 
-CMD ["-p", "8080", "-d", "/public", "--page-fallback", "/public/index.html"]
+CMD ["-p", "8080", "-d", "/public", "--page-fallback", "/public/index.html", "-w", "/config.toml"]

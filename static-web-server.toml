@@ -1,0 +1,33 @@
+# Static Web Server configuration
+
+[advanced]
+
+# HTML files - always revalidate
+[[advanced.headers]]
+source = "**/*.html"
+[advanced.headers.headers]
+Cache-Control = "no-cache"
+
+# JS files - always revalidate
+[[advanced.headers]]
+source = "**/*.js"
+[advanced.headers.headers]
+Cache-Control = "no-cache"
+
+# CSS files - always revalidate
+[[advanced.headers]]
+source = "**/*.css"
+[advanced.headers.headers]
+Cache-Control = "no-cache"
+
+# Images - always revalidate
+[[advanced.headers]]
+source = "**/*.{png,jpg,jpeg,gif,svg,ico,webp}"
+[advanced.headers.headers]
+Cache-Control = "no-cache"
+
+# Fonts - cache for 1 year (rarely change)
+[[advanced.headers]]
+source = "**/*.{woff,woff2,ttf,otf,eot}"
+[advanced.headers.headers]
+Cache-Control = "public, max-age=31536000"

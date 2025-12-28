@@ -3,7 +3,9 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 ARG BASE_HREF=/
 ARG APP_VERSION=latest
-ENV FLUTTER_ALLOW_SUPERUSER=true
+
+ENV CI=true
+ENV PUB_CACHE=/root/.pub-cache
 
 WORKDIR /app
 
@@ -24,8 +26,9 @@ ENV SERVER_FALLBACK_PAGE=/public${BASE_HREF}index.html
 
 # Copy to subdirectory matching BASE_HREF
 COPY --from=build /app/build/web /public${BASE_HREF}
+COPY sws-config.toml /config.toml
 
 EXPOSE 8080
 
 ENTRYPOINT ["/static-web-server"]
-CMD ["-p", "8080", "-d", "/public"]
+CMD ["-p", "8080", "-d", "/public", "-w", "/config.toml"]
