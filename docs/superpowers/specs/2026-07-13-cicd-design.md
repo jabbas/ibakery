@@ -42,7 +42,7 @@ interval 1m, HelmRepository interval 24h, ingress class `traefik-external` for
 | Image registry | `ghcr.io/jabbas/ibakery-{backend,artisan,client}` | `GITHUB_TOKEN` auth, no Docker Hub rate limits on cluster pulls |
 | Chart delivery | Classic Helm repo: `index.yaml` on `gh-pages` (GitHub Pages), `.tgz` as GitHub Release assets, via chart-releaser (`cr`) | Owner rejects OCI charts and git-sourced charts; Pages works because repo is public |
 | Deploy mechanism | CI commits a one-line `spec.chart.spec.version` bump to `flux-homeapps` | Deploy state lives in the GitOps repo; history = deploy log; rollback = revert |
-| Versioning | `X.Y.<run_number>`, base `X.Y` read from a root `VERSION` file (initial content `0.1`) | Semver-valid, auto-incrementing, manual control over base |
+| Versioning | SemVer 2.0.0, bump derived from Conventional Commits since the last release tag; CI pushes tag `vX.Y.Z` | SemVer items 6-8 tie MAJOR/MINOR/PATCH to the *kind* of change; commit messages are the only automatable signal for that |
 | Version propagation | `version` + `appVersion` set inside the packaged chart; subchart image tags default to `appVersion` | No image-tag plumbing in HelmRelease values |
 
 ## CI workflow (ibakery repo)
@@ -74,7 +74,16 @@ Gated by `if: github.event_name == 'push'` and `needs:` on all check jobs.
 Serialized with `concurrency: { group: release, cancel-in-progress: false }` so two
 quick merges cannot interleave gh-pages index updates or bump versions out of order.
 
-1. **Version**: `VERSION_TAG="$(cat VERSION).${{ github.run_number }}"` (e.g. `0.1.42`).
+1. **Version**: compute the next SemVer from Conventional Commit messages since the
+   last `v*` tag (e.g. `mathieudutour/github-tag-action`), then push tag `v$VERSION_TAG`:
+   - `fix:` (and non-conforming messages, as default) → PATCH — SemVer item 6
+   - `feat:` → MINOR (PATCH resets to 0) — SemVer item 7
+   - `feat!:` / `BREAKING CHANGE:` footer → MAJOR — SemVer item 8
+   - The workflow triggers on `push: branches: [main]` only, so the tag push does
+     not re-trigger CI. Releases start at `v0.1.0` (SemVer item 4: 0.y.z = initial
+     development, anything may change); `v1.0.0` is a deliberate manual tag later.
+   - Convention required: commits landing on `main` follow Conventional Commits
+     (with squash merges, the PR title becomes the commit message).
 2. **Images**: build & push `ghcr.io/jabbas/ibakery-{backend,artisan,client}:$VERSION_TAG`
    for `linux/amd64` via buildx.
    - backend: `docker/build-push-action` on `backend/`, build-arg `APP_VERSION`.
@@ -135,11 +144,13 @@ entry currently in `helm/values.yaml` is removed.
 3. First published packages on ghcr.io: set visibility to public so the cluster can
    pull without an imagePullSecret.
 4. Create the application Secret in the `ibakery` namespace on the cluster.
-5. **Bootstrap order**: land and run the ibakery CI first so release `0.1.1` exists
+5. Push seed tag `v0.1.0` on ibakery so the first release computes from a baseline
+   (first merge then becomes `0.1.1` or `0.2.0` depending on its commit type).
+6. **Bootstrap order**: land and run the ibakery CI first so the first release exists
    (images, GitHub Release, Pages index), then add the `applications/ibakery/`
    manifests to flux-homeapps pinned to that version. Never point Flux at a version
    that has not been published.
-6. Remove the stale `baker`/`client` services from `docker-compose.yml` or leave for
+7. Remove the stale `baker`/`client` services from `docker-compose.yml` or leave for
    local dev (postgres + backend only) — cosmetic, not blocking.
 
 ## Failure handling & rollback
@@ -155,10 +166,11 @@ entry currently in `helm/values.yaml` is removed.
 ## Verification (definition of done)
 
 1. PR touching only `backend/` runs only backend checks; failing ruff/pytest blocks merge.
-2. Merge to `main` produces: three ghcr images tagged `X.Y.<run>`, GitHub Release
-   `ibakery-X.Y.<run>` with chart `.tgz`, updated `index.yaml` on Pages
+2. Merge to `main` produces: git tag `vX.Y.Z` (bump matching the commit type per
+   SemVer items 6-8), three ghcr images tagged `X.Y.Z`, GitHub Release
+   `ibakery-X.Y.Z` with chart `.tgz`, updated `index.yaml` on Pages
    (`helm repo add ibakery https://jabbas.github.io/ibakery && helm search repo ibakery`
    shows the version), and a one-line commit in flux-homeapps.
 3. `flux get hr -n ibakery` shows the new chart version reconciled; app pods run the
-   new images; `https://marta.jabbas.eu/api/version` returns `X.Y.<run>`.
+   new images; `https://marta.jabbas.eu/api/version` returns `X.Y.Z`.
 4. Reverting the bump commit rolls the deployment back.
