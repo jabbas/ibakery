@@ -4,7 +4,7 @@ replicaCount: 1
 apiUrl: "http://localhost:8000/api"
 
 image:
-  repository: docker.io/jabbas/ibakery-client
+  repository: ghcr.io/jabbas/ibakery-client
   pullPolicy: Always
   tag: ""
 

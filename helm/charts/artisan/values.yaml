@@ -7,7 +7,7 @@ apiUrl: "http://localhost:8000/api"
 basePath: "/"
 
 image:
-  repository: docker.io/jabbas/ibakery-artisan
+  repository: ghcr.io/jabbas/ibakery-artisan
   pullPolicy: Always
   tag: ""
 

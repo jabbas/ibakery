@@ -44,8 +44,6 @@ backend:
   replicaCount: 1
   ingress:
     enabled: false
-  env:
-    SECRET_KEY: "change-me-in-production"
   # Database connection from CNPG secret (backend uses computed db_url)
   envSecret:
     - name: PGHOST

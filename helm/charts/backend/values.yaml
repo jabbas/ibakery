@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: docker.io/jabbas/ibakery-backend
+  repository: ghcr.io/jabbas/ibakery-backend
   pullPolicy: Always
   tag: ""
 
@@ -9,9 +9,8 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# Environment variables
-env:
-  SECRET_KEY: "change-me-in-production"
+# Environment variables (non-secret only; secrets go via envSecret)
+env: {}
 
 # Environment variables from secrets
 envSecret: []
