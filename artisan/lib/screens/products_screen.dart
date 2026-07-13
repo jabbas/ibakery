@@ -263,7 +263,7 @@ class ProductsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String?>(
-                              value: selectedParentId,
+                              value: selectedParentId, // ignore: deprecated_member_use
                               decoration: const InputDecoration(
                                 labelText: 'Bazuj na produkcie',
                                 hintText: 'Wybierz produkt bazowy (opcjonalnie)',
@@ -540,7 +540,7 @@ class ProductsScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedId,
+                value: selectedId, // ignore: deprecated_member_use
                 decoration: const InputDecoration(labelText: 'Składnik'),
                 items: allIngredients.map((ing) {
                   return DropdownMenuItem(

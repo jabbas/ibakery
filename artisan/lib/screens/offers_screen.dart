@@ -469,7 +469,7 @@ class OffersScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedId,
+                value: selectedId, // ignore: deprecated_member_use
                 decoration: const InputDecoration(labelText: 'Produkt'),
                 items: allProducts.map((p) {
                   return DropdownMenuItem(
@@ -502,7 +502,7 @@ class OffersScreen extends ConsumerWidget {
               if (availableSizes.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String?>(
-                  value: selectedSizeId,
+                  value: selectedSizeId, // ignore: deprecated_member_use
                   decoration: const InputDecoration(labelText: 'Rozmiar'),
                   items: [
                     const DropdownMenuItem<String?>(

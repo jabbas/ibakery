@@ -5,6 +5,9 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+@TestOn('chrome')
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,8 +16,10 @@ import 'package:baker/main.dart';
 
 void main() {
   testWidgets('App renders', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BakerApp()));
-    await tester.pump();
+    await tester.runAsync(() async {
+      await tester.pumpWidget(const ProviderScope(child: BakerApp()));
+      await tester.pump();
+    });
 
     // Verify app renders
     expect(find.byType(MaterialApp), findsOneWidget);

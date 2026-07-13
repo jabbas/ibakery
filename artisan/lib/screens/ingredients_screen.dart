@@ -128,7 +128,7 @@ class IngredientsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: selectedUnitId,
+                    value: selectedUnitId, // ignore: deprecated_member_use
                     decoration: const InputDecoration(labelText: 'Jednostka'),
                     items: units.map((unit) {
                       return DropdownMenuItem(
