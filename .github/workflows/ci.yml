@@ -190,17 +190,39 @@ jobs:
           mkdir -p .cr-release-packages
           helm package helm/ --dependency-update -d .cr-release-packages
           ls -l .cr-release-packages
-      - name: Configure git for chart-releaser
+      - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Upload release and update index on gh-pages
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          skip_packaging: true
-          skip_existing: true
+      # Manual publish (chart-releaser-action@v1.7.0 crashes with skip_packaging:
+      # "latest_tag: unbound variable"); this is deterministic and idempotent.
+      - name: Publish chart to GitHub release and gh-pages index
         env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          V: ${{ needs.version.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PKG=".cr-release-packages/ibakery-${V}.tgz"
+          gh release view "ibakery-${V}" >/dev/null 2>&1 \
+            || gh release create "ibakery-${V}" "$PKG" --title "ibakery-${V}" --notes "Helm chart ibakery ${V}"
+          git fetch origin gh-pages
+          git worktree add /tmp/gh-pages FETCH_HEAD
+          if [ -f /tmp/gh-pages/index.yaml ]; then
+            helm repo index .cr-release-packages \
+              --url "https://github.com/jabbas/ibakery/releases/download/ibakery-${V}" \
+              --merge /tmp/gh-pages/index.yaml
+          else
+            helm repo index .cr-release-packages \
+              --url "https://github.com/jabbas/ibakery/releases/download/ibakery-${V}"
+          fi
+          cp .cr-release-packages/index.yaml /tmp/gh-pages/index.yaml
+          cd /tmp/gh-pages
+          git add index.yaml
+          if git diff --cached --quiet; then
+            echo "Index unchanged"
+          else
+            git commit -m "ibakery ${V}"
+            git push origin HEAD:gh-pages
+          fi
 
   deploy-bump:
     needs: [version, chart]
