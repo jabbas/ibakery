@@ -19,4 +19,4 @@ class ProductSize(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
-    product: Mapped["Product"] = relationship("Product", back_populates="sizes")
+    product: Mapped["Product"] = relationship("Product", back_populates="sizes")  # noqa: F821

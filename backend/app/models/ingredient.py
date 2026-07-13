@@ -30,7 +30,7 @@ class Ingredient(Base):
         return Decimal("0")
 
     # Relationships
-    unit: Mapped["Unit"] = relationship("Unit", back_populates="ingredients")
-    product_ingredients: Mapped[list["ProductIngredient"]] = relationship(
+    unit: Mapped["Unit"] = relationship("Unit", back_populates="ingredients")  # noqa: F821
+    product_ingredients: Mapped[list["ProductIngredient"]] = relationship(  # noqa: F821
         "ProductIngredient", back_populates="ingredient"
     )

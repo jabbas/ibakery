@@ -29,14 +29,14 @@ class Product(Base):
     )
 
     # Relationships
-    ingredients: Mapped[list["ProductIngredient"]] = relationship(
+    ingredients: Mapped[list["ProductIngredient"]] = relationship(  # noqa: F821
         "ProductIngredient", back_populates="product", cascade="all, delete-orphan"
     )
-    sizes: Mapped[list["ProductSize"]] = relationship(
+    sizes: Mapped[list["ProductSize"]] = relationship(  # noqa: F821
         "ProductSize", back_populates="product", cascade="all, delete-orphan",
         order_by="ProductSize.sort_order"
     )
-    offer_items: Mapped[list["OfferItem"]] = relationship(
+    offer_items: Mapped[list["OfferItem"]] = relationship(  # noqa: F821
         "OfferItem", back_populates="product"
     )
     parent_product: Mapped["Product | None"] = relationship(

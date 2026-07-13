@@ -18,6 +18,6 @@ class PickupPoint(Base):
     )
 
     # Relationships
-    orders: Mapped[list["Order"]] = relationship(
+    orders: Mapped[list["Order"]] = relationship(  # noqa: F821
         "Order", back_populates="pickup_point"
     )

@@ -21,7 +21,7 @@ async def get_pickup_points(
     """Get all pickup points. Optionally filter by active status."""
     query = select(PickupPoint).order_by(PickupPoint.name)
     if active_only:
-        query = query.where(PickupPoint.is_active == True)
+        query = query.where(PickupPoint.is_active == True)  # noqa: E712
     result = await db.execute(query)
     return result.scalars().all()
 

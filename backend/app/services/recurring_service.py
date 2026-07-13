@@ -1,7 +1,6 @@
 """Service for handling recurring offers."""
 import logging
 from datetime import datetime, date, timedelta
-from uuid import UUID
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -96,9 +95,9 @@ async def generate_recurring_offers(
         .options(selectinload(Offer.items))
         .where(
             and_(
-                Offer.is_recurring == True,
-                Offer.is_active == True,
-                Offer.parent_offer_id == None,  # Only templates, not instances
+                Offer.is_recurring == True,  # noqa: E712
+                Offer.is_active == True,  # noqa: E712
+                Offer.parent_offer_id == None,  # noqa: E711 - Only templates, not instances
             )
         )
     )

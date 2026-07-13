@@ -27,7 +27,7 @@ class Offer(Base):
     )
 
     # Relationships
-    items: Mapped[list["OfferItem"]] = relationship(
+    items: Mapped[list["OfferItem"]] = relationship(  # noqa: F821
         "OfferItem", back_populates="offer", cascade="all, delete-orphan"
     )
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="offer")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="offer")  # noqa: F821

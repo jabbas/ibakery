@@ -42,10 +42,10 @@ class Order(Base):
     )
 
     # Relationships
-    offer: Mapped["Offer"] = relationship("Offer", back_populates="orders")
-    pickup_point: Mapped["PickupPoint"] = relationship(
+    offer: Mapped["Offer"] = relationship("Offer", back_populates="orders")  # noqa: F821
+    pickup_point: Mapped["PickupPoint"] = relationship(  # noqa: F821
         "PickupPoint", back_populates="orders"
     )
-    items: Mapped[list["OrderItem"]] = relationship(
+    items: Mapped[list["OrderItem"]] = relationship(  # noqa: F821
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )

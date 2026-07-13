@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logger.info(f"Log level set to: {settings.log_level.upper()}")
 
-from .routers import (
+from .routers import (  # noqa: E402
     units_router,
     ingredients_router,
     products_router,
@@ -32,10 +32,10 @@ from .routers import (
     auth_router,
     pickup_points_router,
 )
-from .database import async_session
-from .models import *  # noqa: F401, F403 - Import all models for table creation
-from .models.unit import Unit
-from .models.offer import Offer
+from .database import async_session  # noqa: E402
+from .models import *  # noqa: E402, F401, F403 - Import all models for table creation
+from .models.unit import Unit  # noqa: E402
+from .models.offer import Offer  # noqa: E402
 
 # Podstawowe jednostki do utworzenia
 DEFAULT_UNITS = [
@@ -118,8 +118,8 @@ async def generate_recurring_offers_startup():
 
 async def complete_expired_offers():
     """Oznacz przeterminowane oferty jako zakończone."""
-    from datetime import datetime, timedelta
-    from sqlalchemy import and_, update
+    from datetime import datetime
+    from sqlalchemy import and_
 
     logger.info("Sprawdzanie przeterminowanych ofert...")
     async with async_session() as session:
@@ -133,7 +133,7 @@ async def complete_expired_offers():
         result = await session.execute(
             select(Offer).where(
                 and_(
-                    Offer.is_completed == False,
+                    Offer.is_completed == False,  # noqa: E712
                     Offer.pickup_date <= today
                 )
             )

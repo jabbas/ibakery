@@ -19,7 +19,7 @@ class OrderItem(Base):
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
     # Relationships
-    order: Mapped["Order"] = relationship("Order", back_populates="items")
-    offer_item: Mapped["OfferItem"] = relationship(
+    order: Mapped["Order"] = relationship("Order", back_populates="items")  # noqa: F821
+    offer_item: Mapped["OfferItem"] = relationship(  # noqa: F821
         "OfferItem", back_populates="order_items"
     )

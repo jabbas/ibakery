@@ -10,24 +10,22 @@ from sqlalchemy.orm import selectinload
 from ..database import get_db
 
 logger = logging.getLogger(__name__)
-from ..models.offer import Offer
-from ..models.offer_item import OfferItem
-from ..models.order import Order
-from ..models.order_item import OrderItem
-from ..models.product import Product
-from ..models.product_ingredient import ProductIngredient
-from ..models.product_size import ProductSize
-from ..models.ingredient import Ingredient
-from ..models.baker import Baker
-from ..schemas.offer import (
+from ..models.offer import Offer  # noqa: E402
+from ..models.offer_item import OfferItem  # noqa: E402
+from ..models.order import Order  # noqa: E402
+from ..models.product import Product  # noqa: E402
+from ..models.product_ingredient import ProductIngredient  # noqa: E402
+from ..models.ingredient import Ingredient  # noqa: E402
+from ..models.baker import Baker  # noqa: E402
+from ..schemas.offer import (  # noqa: E402
     OfferCreate,
     OfferUpdate,
     OfferResponse,
     OfferSummary,
     IngredientSummary,
 )
-from .auth import get_current_baker
-from ..services.recurring_service import generate_recurring_offers, format_recurrence_rule_pl
+from .auth import get_current_baker  # noqa: E402
+from ..services.recurring_service import generate_recurring_offers  # noqa: E402
 
 router = APIRouter(prefix="/offers", tags=["offers"])
 
@@ -55,9 +53,9 @@ async def get_offers(
 ):
     query = _offer_query()
     if active_only:
-        query = query.where(Offer.is_active == True)
+        query = query.where(Offer.is_active == True)  # noqa: E712
     if not include_completed:
-        query = query.where(Offer.is_completed == False)
+        query = query.where(Offer.is_completed == False)  # noqa: E712
     query = query.order_by(Offer.pickup_date.desc())
     result = await db.execute(query)
     return result.scalars().all()
@@ -69,8 +67,8 @@ async def get_active_offers(db: AsyncSession = Depends(get_db)):
     now = datetime.utcnow()
     result = await db.execute(
         _offer_query()
-        .where(Offer.is_active == True)
-        .where(Offer.is_completed == False)
+        .where(Offer.is_active == True)  # noqa: E712
+        .where(Offer.is_completed == False)  # noqa: E712
         .where(Offer.order_deadline > now)
         .order_by(Offer.pickup_date)
     )
@@ -371,8 +369,8 @@ async def get_recurring_templates(
     """Get all recurring offer templates."""
     result = await db.execute(
         _offer_query()
-        .where(Offer.is_recurring == True)
-        .where(Offer.parent_offer_id == None)
+        .where(Offer.is_recurring == True)  # noqa: E712
+        .where(Offer.parent_offer_id == None)  # noqa: E711
         .order_by(Offer.title)
     )
     return result.scalars().all()

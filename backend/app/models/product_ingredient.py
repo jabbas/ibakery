@@ -18,7 +18,7 @@ class ProductIngredient(Base):
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False)
 
     # Relationships
-    product: Mapped["Product"] = relationship("Product", back_populates="ingredients")
-    ingredient: Mapped["Ingredient"] = relationship(
+    product: Mapped["Product"] = relationship("Product", back_populates="ingredients")  # noqa: F821
+    ingredient: Mapped["Ingredient"] = relationship(  # noqa: F821
         "Ingredient", back_populates="product_ingredients"
     )

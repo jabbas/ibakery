@@ -209,7 +209,7 @@ async def delete_product(
         select(func.count(OfferItem.id))
         .join(Offer, OfferItem.offer_id == Offer.id)
         .where(OfferItem.product_id == product_id)
-        .where(Offer.is_completed == False)
+        .where(Offer.is_completed == False)  # noqa: E712
     )
     active_count = active_offer_items_result.scalar()
 

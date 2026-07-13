@@ -23,9 +23,9 @@ class OfferItem(Base):
     available_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
-    offer: Mapped["Offer"] = relationship("Offer", back_populates="items")
-    product: Mapped["Product | None"] = relationship("Product", back_populates="offer_items")
-    product_size: Mapped["ProductSize"] = relationship("ProductSize")
-    order_items: Mapped[list["OrderItem"]] = relationship(
+    offer: Mapped["Offer"] = relationship("Offer", back_populates="items")  # noqa: F821
+    product: Mapped["Product | None"] = relationship("Product", back_populates="offer_items")  # noqa: F821
+    product_size: Mapped["ProductSize"] = relationship("ProductSize")  # noqa: F821
+    order_items: Mapped[list["OrderItem"]] = relationship(  # noqa: F821
         "OrderItem", back_populates="offer_item"
     )

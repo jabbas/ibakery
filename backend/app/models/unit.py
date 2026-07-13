@@ -16,6 +16,6 @@ class Unit(Base):
     )
 
     # Relationships
-    ingredients: Mapped[list["Ingredient"]] = relationship(
+    ingredients: Mapped[list["Ingredient"]] = relationship(  # noqa: F821
         "Ingredient", back_populates="unit"
     )
