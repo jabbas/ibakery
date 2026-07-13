@@ -182,6 +182,9 @@ jobs:
           for f in helm/Chart.yaml helm/charts/backend/Chart.yaml helm/charts/artisan/Chart.yaml helm/charts/client/Chart.yaml; do
             yq -i ".version = strenv(V) | .appVersion = strenv(V)" "$f"
           done
+          # umbrella dependency constraints must match the bumped subchart versions,
+          # otherwise `helm package --dependency-update` cannot resolve the file:// deps
+          yq -i '.dependencies[].version = strenv(V)' helm/Chart.yaml
       - name: Package umbrella chart
         run: |
           mkdir -p .cr-release-packages
