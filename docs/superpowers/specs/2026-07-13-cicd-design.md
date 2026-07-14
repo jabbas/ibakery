@@ -110,7 +110,9 @@ no deploy.
 
 - `namespace.yaml` — namespace `ibakery`.
 - `repository.yaml` — `HelmRepository` `ibakery`, `url: https://jabbas.github.io/ibakery`,
-  interval 24h (repo convention; the version bump itself triggers reconciliation).
+  interval 10m — the bump reconciles the HelmRelease, but source-controller resolves
+  versions against its cached index, so the repository interval bounds deploy latency
+  (24h convention was wrong here).
 - `release.yaml` — `HelmRelease` `ibakery`, chart `ibakery`, `version: <pinned>`
   (the line CI bumps), interval 1m, install/upgrade remediation retries 3 (repo
   convention). Values: current production values from `helm/values.yaml`

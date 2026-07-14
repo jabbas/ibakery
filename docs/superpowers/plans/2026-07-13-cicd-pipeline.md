@@ -595,7 +595,7 @@ metadata:
   namespace: ibakery
 spec:
   url: https://jabbas.github.io/ibakery
-  interval: 24h
+  interval: 10m
 ```
 
 - [x] **Step 3: Create `applications/ibakery/release.yaml`**
@@ -854,3 +854,7 @@ Executed via subagent-driven development. Deviations from the original plan, all
 - Releases 0.1.1 (no chart — dependency-constraint bug), 0.1.2 (chart published, action crashed post-publish), 0.1.3 (first complete release, first cluster deploy), 0.1.4 (first fully-green run incl. deploy-bump; auto-upgraded on cluster).
 - Rollback drill skipped (optional) to avoid production churn.
 - Backend test run in CI uses Python 3.13; local dev on newer Pythons may need dep upgrades (psycopg2/sqlalchemy wheels).
+- Post-review must-fix: HelmRepository interval lowered 24h → 10m — the deploy bump
+  cannot resolve chart versions absent from source-controller's cached index, so the
+  repository interval bounds deploy latency (0.1.5 stalled until the index refetch).
+  Follow-up candidate: Flux webhook Receiver for instant index refresh.
