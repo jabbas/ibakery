@@ -2,6 +2,26 @@ apiVersion: v1
 entries:
   ibakery:
   - apiVersion: v2
+    appVersion: 0.1.4
+    created: "2026-07-14T05:16:07.991730915Z"
+    dependencies:
+    - name: backend
+      repository: file://charts/backend
+      version: 0.1.4
+    - name: artisan
+      repository: file://charts/artisan
+      version: 0.1.4
+    - name: client
+      repository: file://charts/client
+      version: 0.1.4
+    description: iBakery - Online Bakery Ordering System
+    digest: cc939a6281c404df9d28c46ae6c3b2ec21b3c584d7ddd47289b7ab0d20b6e1ab
+    name: ibakery
+    type: application
+    urls:
+    - https://github.com/jabbas/ibakery/releases/download/ibakery-0.1.4/ibakery-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
     appVersion: 0.1.3
     created: "2026-07-13T21:00:32.87006344Z"
     dependencies:
@@ -41,4 +61,4 @@ entries:
     urls:
     - https://github.com/jabbas/ibakery/releases/download/ibakery-0.1.2/ibakery-0.1.2.tgz
     version: 0.1.2
-generated: "2026-07-13T21:00:32.867490737Z"
+generated: "2026-07-14T05:16:07.989639288Z"
