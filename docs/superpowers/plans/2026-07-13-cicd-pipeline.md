@@ -23,14 +23,14 @@
 - Create: `backend/tests/test_health.py`
 - Modify: `AGENTS.md` (dev-deps note; done in Task 7)
 
-- [ ] **Step 1: Create `backend/requirements-dev.txt`**
+- [x] **Step 1: Create `backend/requirements-dev.txt`**
 
 ```
 ruff==0.14.4
 pytest==8.4.2
 ```
 
-- [ ] **Step 2: Create venv and install deps**
+- [x] **Step 2: Create venv and install deps**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery/backend
@@ -40,7 +40,7 @@ python3 -m venv .venv
 
 Expected: exits 0. (If `.venv` already exists, reuse it.)
 
-- [ ] **Step 3: Write the smoke test**
+- [x] **Step 3: Write the smoke test**
 
 `backend/tests/test_health.py`:
 
@@ -58,7 +58,7 @@ def test_health():
     assert response.json() == {"status": "healthy"}
 ```
 
-- [ ] **Step 4: Run pytest, verify it collects and passes**
+- [x] **Step 4: Run pytest, verify it collects and passes**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery/backend && .venv/bin/pytest -v
@@ -66,7 +66,7 @@ cd /Users/jabbas/Projects/ibakery/backend && .venv/bin/pytest -v
 
 Expected: `1 passed`. (Before this task pytest exited with code 5 = no tests collected; that would fail CI.)
 
-- [ ] **Step 5: Run ruff and fix findings**
+- [x] **Step 5: Run ruff and fix findings**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery/backend && .venv/bin/ruff check .
@@ -74,7 +74,7 @@ cd /Users/jabbas/Projects/ibakery/backend && .venv/bin/ruff check .
 
 If findings: run `.venv/bin/ruff check . --fix`, review the diff (`git diff backend/`), fix remaining findings manually (typical: unused imports). Re-run until exit 0.
 
-- [ ] **Step 6: Verify `.venv` is gitignored**
+- [x] **Step 6: Verify `.venv` is gitignored**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery && git status --short backend/ | grep -c '.venv'
@@ -82,7 +82,7 @@ cd /Users/jabbas/Projects/ibakery && git status --short backend/ | grep -c '.ven
 
 Expected: `0`. If `.venv` shows up, add `.venv/` to `backend/.gitignore`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -97,29 +97,31 @@ git commit -m "test: add backend smoke test and dev requirements" -- backend/
 **Files:**
 - Possibly modify: `artisan/lib/**`, `client/lib/**`, `*/test/widget_test.dart` (only if analyze/test fail)
 
-- [ ] **Step 1: Run checks for artisan**
+- [x] **Step 1: Run checks for artisan**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery/artisan
-flutter pub get && flutter analyze && flutter test
+flutter pub get && flutter analyze && flutter test --platform chrome
 ```
 
 Expected: `No issues found!` and `All tests passed!`.
+(`--platform chrome` is required: both apps import `dart:js_interop` (web-only), so
+tests carry `@TestOn('chrome')` and plain `flutter test` exits 79 with "No tests ran.")
 
-- [ ] **Step 2: Run checks for client**
+- [x] **Step 2: Run checks for client**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery/client
-flutter pub get && flutter analyze && flutter test
+flutter pub get && flutter analyze && flutter test --platform chrome
 ```
 
 Expected: same.
 
-- [ ] **Step 3: Fix failures if any**
+- [x] **Step 3: Fix failures if any**
 
 Fix reported analyzer issues / failing tests in the affected app. Keep fixes minimal — do not refactor. Re-run Step 1/2 until green. If everything was already green, skip Step 4.
 
-- [ ] **Step 4: Commit (only if files changed)**
+- [x] **Step 4: Commit (only if files changed)**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -135,7 +137,7 @@ git commit -m "fix: make flutter analyze and tests pass" -- artisan/ client/
 - Modify: `helm/charts/client/values.yaml:7`
 - Modify: `helm/values.yaml` (remove `backend.env.SECRET_KEY`)
 
-- [ ] **Step 1: Point image repositories at ghcr**
+- [x] **Step 1: Point image repositories at ghcr**
 
 In `helm/charts/backend/values.yaml` change:
 
@@ -158,7 +160,7 @@ image:
   repository: ghcr.io/jabbas/ibakery-client
 ```
 
-- [ ] **Step 2: Remove SECRET_KEY defaults from values**
+- [x] **Step 2: Remove SECRET_KEY defaults from values**
 
 In `helm/charts/backend/values.yaml` replace:
 
@@ -182,7 +184,7 @@ In `helm/values.yaml` delete these two lines from the `backend:` block:
     SECRET_KEY: "change-me-in-production"
 ```
 
-- [ ] **Step 3: Sanity-render the chart**
+- [x] **Step 3: Sanity-render the chart**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -192,7 +194,7 @@ helm lint helm/ && helm template ibakery helm/ --dependency-update >/dev/null &&
 Expected: `RENDER_OK` (lint may print info-level notes; errors are failures).
 Verify tag defaulting is intact: `helm template ibakery helm/ | grep 'image:'` shows `ghcr.io/jabbas/ibakery-*:0.0.1` (current committed appVersion).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -205,7 +207,7 @@ git commit -m "chore: switch charts to ghcr images, drop secret defaults from va
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 `.github/workflows/ci.yml` — complete file:
 
@@ -228,6 +230,7 @@ concurrency:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       artisan: ${{ steps.filter.outputs.artisan }}
@@ -254,6 +257,7 @@ jobs:
     # On main pushes always run (a release builds all images); on PRs only when changed
     if: github.event_name == 'push' || needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -275,6 +279,7 @@ jobs:
       needs.changes.outputs.artisan == 'true' ||
       needs.changes.outputs.client == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         app: [artisan, client]
@@ -288,13 +293,16 @@ jobs:
         working-directory: ${{ matrix.app }}
       - run: flutter analyze
         working-directory: ${{ matrix.app }}
-      - run: flutter test
+      # --platform chrome: apps are web-only (dart:js_interop), tests are @TestOn('chrome');
+      # ubuntu-latest runners have Chrome preinstalled
+      - run: flutter test --platform chrome
         working-directory: ${{ matrix.app }}
 
   version:
     if: github.event_name == 'push'
     needs: [check-backend, check-flutter]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.tag.outputs.new_version }}
       tag: ${{ steps.tag.outputs.new_tag }}
@@ -313,6 +321,7 @@ jobs:
   image-backend:
     needs: version
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -333,6 +342,7 @@ jobs:
   image-flutter:
     needs: version
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         include:
@@ -374,6 +384,7 @@ jobs:
   chart:
     needs: [version, image-backend, image-flutter]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -385,26 +396,52 @@ jobs:
           for f in helm/Chart.yaml helm/charts/backend/Chart.yaml helm/charts/artisan/Chart.yaml helm/charts/client/Chart.yaml; do
             yq -i ".version = strenv(V) | .appVersion = strenv(V)" "$f"
           done
+          # umbrella dependency constraints must match the bumped subchart versions,
+          # otherwise `helm package --dependency-update` cannot resolve the file:// deps
+          yq -i '.dependencies[].version = strenv(V)' helm/Chart.yaml
       - name: Package umbrella chart
         run: |
           mkdir -p .cr-release-packages
           helm package helm/ --dependency-update -d .cr-release-packages
           ls -l .cr-release-packages
-      - name: Configure git for chart-releaser
+      - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Upload release and update index on gh-pages
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          skip_packaging: true
-          skip_existing: true
+      # Manual publish (chart-releaser-action@v1.7.0 crashes with skip_packaging:
+      # "latest_tag: unbound variable"); this is deterministic and idempotent.
+      - name: Publish chart to GitHub release and gh-pages index
         env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          V: ${{ needs.version.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PKG=".cr-release-packages/ibakery-${V}.tgz"
+          gh release view "ibakery-${V}" >/dev/null 2>&1 \
+            || gh release create "ibakery-${V}" "$PKG" --title "ibakery-${V}" --notes "Helm chart ibakery ${V}"
+          git fetch origin gh-pages
+          git worktree add /tmp/gh-pages FETCH_HEAD
+          if [ -f /tmp/gh-pages/index.yaml ]; then
+            helm repo index .cr-release-packages \
+              --url "https://github.com/jabbas/ibakery/releases/download/ibakery-${V}" \
+              --merge /tmp/gh-pages/index.yaml
+          else
+            helm repo index .cr-release-packages \
+              --url "https://github.com/jabbas/ibakery/releases/download/ibakery-${V}"
+          fi
+          cp .cr-release-packages/index.yaml /tmp/gh-pages/index.yaml
+          cd /tmp/gh-pages
+          git add index.yaml
+          if git diff --cached --quiet; then
+            echo "Index unchanged"
+          else
+            git commit -m "ibakery ${V}"
+            git push origin HEAD:gh-pages
+          fi
 
   deploy-bump:
     needs: [version, chart]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -415,13 +452,17 @@ jobs:
           V: ${{ needs.version.outputs.version }}
         run: |
           yq -i '.spec.chart.spec.version = strenv(V)' applications/ibakery/release.yaml
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "ibakery ${V}"
-          git push
+          if git diff --quiet; then
+            echo "Version already ${V}, nothing to bump"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "ibakery ${V}"
+            git push
+          fi
 ```
 
-- [ ] **Step 2: Validate workflow syntax locally**
+- [x] **Step 2: Validate workflow syntax locally**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -430,7 +471,7 @@ yq '.jobs | keys' .github/workflows/ci.yml
 
 Expected: list of 8 job names, no YAML parse error. (If `actionlint` is installed, also run `actionlint .github/workflows/ci.yml` — expected: no output.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -444,7 +485,7 @@ git commit -m "ci: add build, release and deploy-bump pipeline" -- .github/
 
 **Files:** none in the repo (repo settings, branch, tag). Requires `gh` CLI authenticated as jabbas.
 
-- [ ] **Step 1 (USER ACTION): Create fine-grained PAT**
+- [x] **Step 1 (USER ACTION): Create fine-grained PAT**
 
 In GitHub UI: Settings → Developer settings → Fine-grained tokens → Generate new token. Resource owner `jabbas`, repository access: **only `jabbas/flux-homeapps`**, permissions: Contents = Read and write. Then store it:
 
@@ -455,7 +496,7 @@ gh secret set FLUX_HOMEAPPS_TOKEN --app actions
 
 (paste the token when prompted)
 
-- [ ] **Step 2: Create empty gh-pages branch (plumbing — does not touch the dirty worktree/index)**
+- [x] **Step 2: Create empty gh-pages branch (plumbing — does not touch the dirty worktree/index)**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -465,7 +506,7 @@ git branch gh-pages "$commit"
 git push origin gh-pages
 ```
 
-- [ ] **Step 3: Enable GitHub Pages on gh-pages**
+- [x] **Step 3: Enable GitHub Pages on gh-pages**
 
 ```bash
 gh api -X POST repos/jabbas/ibakery/pages \
@@ -476,7 +517,7 @@ gh api -X POST repos/jabbas/ibakery/pages \
 
 Expected: JSON response containing `"html_url": "https://jabbas.github.io/ibakery/"`.
 
-- [ ] **Step 4: Seed SemVer baseline tag**
+- [x] **Step 4: Seed SemVer baseline tag**
 
 Tag the current pushed tip of main as the 0.1.0 baseline:
 
@@ -487,7 +528,7 @@ git tag v0.1.0 "$(git rev-parse origin/main 2>/dev/null || git rev-parse HEAD)"
 git push origin v0.1.0
 ```
 
-- [ ] **Step 5: Push main and watch the first release**
+- [x] **Step 5: Push main and watch the first release**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -505,7 +546,7 @@ git fetch --tags && git tag --sort=-creatordate | head -3
 
 Expected: a release like `ibakery-0.1.1` and tag `v0.1.1`. Record this version for Task 6 (referred to as `<FIRST_VERSION>`).
 
-- [ ] **Step 6: Verify helm repo works**
+- [x] **Step 6: Verify helm repo works**
 
 ```bash
 helm repo add ibakery https://jabbas.github.io/ibakery
@@ -515,7 +556,7 @@ helm search repo ibakery
 
 Expected: `ibakery/ibakery` with `CHART VERSION` = `<FIRST_VERSION>`. (Pages can take ~1 min to publish; retry once if 404.)
 
-- [ ] **Step 7 (USER ACTION): Make ghcr packages public**
+- [x] **Step 7 (USER ACTION): Make ghcr packages public**
 
 GitHub UI → jabbas profile → Packages → for each of `ibakery-backend`, `ibakery-artisan`, `ibakery-client`: Package settings → Change visibility → Public. Verify anonymously:
 
@@ -533,7 +574,7 @@ Expected: `PUBLIC_OK` (works without docker login).
 - Create: `applications/ibakery/release.yaml`
 - Modify: `applications/kustomization.yaml`
 
-- [ ] **Step 1: Create `applications/ibakery/namespace.yaml`**
+- [x] **Step 1: Create `applications/ibakery/namespace.yaml`**
 
 ```yaml
 ---
@@ -543,7 +584,7 @@ metadata:
   name: ibakery
 ```
 
-- [ ] **Step 2: Create `applications/ibakery/repository.yaml`**
+- [x] **Step 2: Create `applications/ibakery/repository.yaml`**
 
 ```yaml
 ---
@@ -557,7 +598,7 @@ spec:
   interval: 24h
 ```
 
-- [ ] **Step 3: Create `applications/ibakery/release.yaml`**
+- [x] **Step 3: Create `applications/ibakery/release.yaml`**
 
 Replace `<FIRST_VERSION>` with the version recorded in Task 5 Step 5 (e.g. `0.1.1`):
 
@@ -664,7 +705,7 @@ spec:
 
 (Values mirror `helm/values.yaml` in ibakery, minus the removed `SECRET_KEY` env, plus app secrets via `envSecret` — same mechanism as the PG* CNPG entries.)
 
-- [ ] **Step 4: Register in `applications/kustomization.yaml`**
+- [x] **Step 4: Register in `applications/kustomization.yaml`**
 
 Add to `resources:` (keep existing firecrawl entries):
 
@@ -674,7 +715,7 @@ Add to `resources:` (keep existing firecrawl entries):
   - ibakery/release.yaml
 ```
 
-- [ ] **Step 5 (USER ACTION): Create app secret on the cluster**
+- [x] **Step 5 (USER ACTION): Create app secret on the cluster**
 
 User must run (with real values):
 
@@ -687,7 +728,7 @@ kubectl create secret generic ibakery-app-secrets -n ibakery \
   --from-literal=MAIL_PASSWORD='<smtp-pass>'
 ```
 
-- [ ] **Step 6: Validate and push**
+- [x] **Step 6: Validate and push**
 
 ```bash
 cd /Users/jabbas/Projects/flux-homeapps
@@ -699,7 +740,7 @@ git push
 
 Expected: `KUSTOMIZE_OK`, push succeeds.
 
-- [ ] **Step 7: Verify Flux rollout**
+- [x] **Step 7: Verify Flux rollout**
 
 ```bash
 flux reconcile source git home-applications -n flux-system
@@ -717,17 +758,17 @@ Expected: HelmRelease `ibakery` Ready=True at `<FIRST_VERSION>`; backend/artisan
 - Modify: `docker-compose.yml` (remove dead `baker`/`client` services)
 - Modify: `AGENTS.md` (Commands + gotchas sections)
 
-- [ ] **Step 1: Delete build.sh**
+- [x] **Step 1: Delete build.sh**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery && git rm build.sh
 ```
 
-- [ ] **Step 2: Remove dead compose services**
+- [x] **Step 2: Remove dead compose services**
 
 In `docker-compose.yml` delete the `baker:` and `client:` service blocks (lines 31-51), keeping `postgres`, `backend`, and `volumes:`.
 
-- [ ] **Step 3: Update AGENTS.md**
+- [x] **Step 3: Update AGENTS.md**
 
 Replace the "Build & deploy" part of the Commands section with:
 
@@ -744,9 +785,9 @@ Build & deploy (CI/CD — see docs/superpowers/specs/2026-07-13-cicd-design.md):
   requirements.txt -r requirements-dev.txt`.
 ```
 
-Also update the stale-docs warning (compose services now cleaned) and delete the `./build.sh` reference and "macOS-only/podman" notes.
+Also update the stale-docs warning (compose services now cleaned), delete the `./build.sh` reference and "macOS-only/podman" notes, and change the Flutter test command in the Commands section to `flutter test --platform chrome` (with a note that plain `flutter test` exits 79 — apps are web-only via `dart:js_interop`, tests are `@TestOn('chrome')`).
 
-- [ ] **Step 4: Verify compose still valid**
+- [x] **Step 4: Verify compose still valid**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery && docker-compose config >/dev/null && echo COMPOSE_OK
@@ -754,7 +795,7 @@ cd /Users/jabbas/Projects/ibakery && docker-compose config >/dev/null && echo CO
 
 Expected: `COMPOSE_OK` (or use `podman-compose config` / `docker compose config`).
 
-- [ ] **Step 5: Commit and push (triggers a release — that's fine)**
+- [x] **Step 5: Commit and push (triggers a release — that's fine)**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -768,7 +809,7 @@ Expected: full pipeline green **including `deploy-bump`** this time (release.yam
 
 ### Task 8: End-to-end verification (definition of done)
 
-- [ ] **Step 1: PR path filtering**
+- [x] **Step 1: PR path filtering**
 
 Create a branch with a backend-only whitespace change, open a PR:
 
@@ -784,7 +825,7 @@ gh pr checks --watch
 
 Expected: `check-backend` runs; `check-flutter` is skipped; no release jobs. Then close without merging: `gh pr close test/ci-paths --delete-branch`.
 
-- [ ] **Step 2: Confirm spec verification items**
+- [x] **Step 2: Confirm spec verification items**
 
 - `gh release list` shows `ibakery-X.Y.Z` releases ✓
 - `helm search repo ibakery` shows latest version ✓ (after `helm repo update`)
@@ -792,7 +833,7 @@ Expected: `check-backend` runs; `check-flutter` is skipped; no release jobs. The
 - `curl -s https://marta.jabbas.eu/api/version` matches the latest tag ✓
 - Rollback drill (optional): revert the last bump commit in flux-homeapps, push, watch Flux downgrade, then re-revert.
 
-- [ ] **Step 3: Commit the plan checkboxes / state**
+- [x] **Step 3: Commit the plan checkboxes / state**
 
 ```bash
 cd /Users/jabbas/Projects/ibakery
@@ -800,3 +841,16 @@ git add docs/superpowers/plans/2026-07-13-cicd-pipeline.md
 git commit -m "docs: mark CI/CD plan executed" -- docs/
 git push origin main
 ```
+
+---
+
+## Execution log (2026-07-13/14)
+
+Executed via subagent-driven development. Deviations from the original plan, all reflected above:
+- Flutter tests require `flutter test --platform chrome` (apps are web-only via dart:js_interop; plain `flutter test` exits 79).
+- chart job also bumps umbrella `dependencies[].version` (helm package could not resolve file:// deps otherwise).
+- chart-releaser-action@v1.7.0 replaced with manual `gh release create` + `helm repo index` (action crashes with skip_packaging: "latest_tag: unbound variable").
+- Job timeouts + idempotent deploy-bump added after workflow security review.
+- Releases 0.1.1 (no chart — dependency-constraint bug), 0.1.2 (chart published, action crashed post-publish), 0.1.3 (first complete release, first cluster deploy), 0.1.4 (first fully-green run incl. deploy-bump; auto-upgraded on cluster).
+- Rollback drill skipped (optional) to avoid production churn.
+- Backend test run in CI uses Python 3.13; local dev on newer Pythons may need dep upgrades (psycopg2/sqlalchemy wheels).

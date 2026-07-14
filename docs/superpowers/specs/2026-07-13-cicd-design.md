@@ -40,7 +40,7 @@ interval 1m, HelmRepository interval 24h, ingress class `traefik-external` for
 | CI system | GitHub Actions | Repo lives on GitHub; free for public repos |
 | Deploy trigger | Every merge to `main` | Owner preference (option B) |
 | Image registry | `ghcr.io/jabbas/ibakery-{backend,artisan,client}` | `GITHUB_TOKEN` auth, no Docker Hub rate limits on cluster pulls |
-| Chart delivery | Classic Helm repo: `index.yaml` on `gh-pages` (GitHub Pages), `.tgz` as GitHub Release assets, via chart-releaser (`cr`) | Owner rejects OCI charts and git-sourced charts; Pages works because repo is public |
+| Chart delivery | Classic Helm repo: `index.yaml` on `gh-pages` (GitHub Pages), `.tgz` as GitHub Release assets, published via `gh release create` + `helm repo index` (chart-releaser-action@v1.7.0 has a `skip_packaging` bug — `latest_tag: unbound variable`) | Owner rejects OCI charts and git-sourced charts; Pages works because repo is public |
 | Deploy mechanism | CI commits a one-line `spec.chart.spec.version` bump to `flux-homeapps` | Deploy state lives in the GitOps repo; history = deploy log; rollback = revert |
 | Versioning | SemVer 2.0.0, bump derived from Conventional Commits since the last release tag; CI pushes tag `vX.Y.Z` | SemVer items 6-8 tie MAJOR/MINOR/PATCH to the *kind* of change; commit messages are the only automatable signal for that |
 | Version propagation | `version` + `appVersion` set inside the packaged chart; subchart image tags default to `appVersion` | No image-tag plumbing in HelmRelease values |
