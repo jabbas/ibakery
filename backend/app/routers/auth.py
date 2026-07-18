@@ -72,6 +72,14 @@ async def register_baker(
     baker_data: BakerCreate,
     db: AsyncSession = Depends(get_db),
 ):
+    # Rejestracja jest dostępna tylko podczas pierwszej konfiguracji (bootstrap)
+    existing = await db.execute(select(Baker).limit(1))
+    if existing.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Rejestracja jest zamknięta",
+        )
+
     # Check if baker already exists
     result = await db.execute(select(Baker).where(Baker.email == baker_data.email))
     if result.scalar_one_or_none():
